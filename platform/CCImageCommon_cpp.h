@@ -1900,7 +1900,7 @@ bool Image::saveImageToPNG(const char * filePath, bool isToRGB)
             break;
         }
 
-        if (hasAlpha())
+        if (!hasAlpha())
         {
             for (int i = 0; i < (int)_height; i++)
             {
