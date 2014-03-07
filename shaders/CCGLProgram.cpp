@@ -271,6 +271,14 @@ bool GLProgram::link()
 	
     if (status == GL_FALSE)
     {
+		GLint logLength;
+        glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength);
+
+        char* log = new char[logLength];
+
+        glGetProgramInfoLog(_program, logLength, 0, log);
+        CCLOG("cocos2d: ERROR: Program link error: %s", log);
+
         CCLOG("cocos2d: ERROR: Failed to link program: %i", _program);
         GL::deleteProgram(_program);
         _program = 0;
