@@ -213,3 +213,9 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+#############
+## Cocos2dx
+#############
+proj.win32/Debug.win32
+proj.win32/Release.win32

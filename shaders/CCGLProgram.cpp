@@ -174,6 +174,7 @@ bool GLProgram::compileShader(GLuint * shader, GLenum type, const GLchar* source
 #if (CC_TARGET_PLATFORM != CC_PLATFORM_WIN32 && CC_TARGET_PLATFORM != CC_PLATFORM_LINUX && CC_TARGET_PLATFORM != CC_PLATFORM_MAC)
         (type == GL_VERTEX_SHADER ? "precision highp float;\n" : "precision mediump float;\n"),
 #endif
+		"#version 120\n"
         "uniform mat4 CC_PMatrix;\n"
         "uniform mat4 CC_MVMatrix;\n"
         "uniform mat4 CC_MVPMatrix;\n"
