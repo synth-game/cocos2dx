@@ -64,6 +64,7 @@ struct Color3B
     const static Color3B GREEN;
     const static Color3B RED;
     const static Color3B MAGENTA;
+	const static Color3B CYAN;
     const static Color3B BLACK;
     const static Color3B ORANGE;
     const static Color3B GRAY;
@@ -99,6 +100,7 @@ struct Color4B
     const static Color4B GREEN;
     const static Color4B RED;
     const static Color4B MAGENTA;
+	const static Color4B CYAN;
     const static Color4B BLACK;
     const static Color4B ORANGE;
     const static Color4B GRAY;
@@ -152,6 +154,7 @@ struct Color4F
     const static Color4F GREEN;
     const static Color4F RED;
     const static Color4F MAGENTA;
+	const static Color4F CYAN;
     const static Color4F BLACK;
     const static Color4F ORANGE;
     const static Color4F GRAY;
