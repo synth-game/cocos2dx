@@ -86,6 +86,20 @@ struct Color4B
     
     Color4B(): r(0), g(0), b(0), a(0) {}
     
+	bool operator==(Color4B other) {
+		if (this->r == other.r && this->g == other.g && this->b == other.b && this->a == other.a) {
+			return true;
+		}
+		return false;
+	}
+
+	bool operator!=(Color4B other) {
+		if (*this==other) {
+			return false;
+		}
+		return true;
+	}
+
     // This function should use Color4F, so implement it in .cpp file.
     explicit Color4B(const Color4F &color4F);
 
