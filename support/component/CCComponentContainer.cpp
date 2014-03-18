@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright (c) 2013 cocos2d-x.org
+Copyright (c) 2013-2014 Chukong Technologies Inc.
 
 http://www.cocos2d-x.org
 
@@ -23,125 +23,125 @@ THE SOFTWARE.
 ****************************************************************************/
 
 
-#include "support/component/CCComponentContainer.h"
-#include "support/component/CCComponent.h"
+#include "CCComponentContainer.h"
+#include "CCComponent.h"
 #include "CCDirector.h"
 
 NS_CC_BEGIN
 
-ComponentContainer::ComponentContainer(Node *pNode)
-: _components(NULL)
-, _owner(pNode)
+ComponentContainer::ComponentContainer(Node *node)
+: _components()
+, _owner(node)
 {
 }
 
 ComponentContainer::~ComponentContainer(void)
 {
-    CC_SAFE_RELEASE(_components);
 }
 
-Component* ComponentContainer::get(const char *pName) const
+Component* ComponentContainer::get(const char* name) const
 {
-    Component* pRet = NULL;
-    CCASSERT(pName != NULL, "Argument must be non-nil");
+    Component* ret = nullptr;
     do {
-        CC_BREAK_IF(NULL == pName);
-        CC_BREAK_IF(NULL == _components);
-        pRet = dynamic_cast<Component*>(_components->objectForKey(pName));
+        CC_BREAK_IF(_components.empty());
+		auto iter = _components.find(std::string(name));
+		if(iter != _components.end()) {
+			ret = iter->second;
+		}
         
     } while (0);
-    return pRet;
+    return ret;
 }
 
-bool ComponentContainer::add(Component *pCom)
+bool ComponentContainer::add(Component *com)
 {
-    bool bRet = false;
-    CCASSERT(pCom != NULL, "Argument must be non-nil");
-    CCASSERT(pCom->getOwner() == NULL, "Component already added. It can't be added again");
+    bool ret = false;
+    CCASSERT(com != nullptr, "Argument must be non-nil");
+    CCASSERT(com->getOwner() == nullptr, "Component already added. It can't be added again");
     do
     {
-        if (_components == NULL)
+        if (_components.empty())
         {
-            _components = Dictionary::create();
-            _components->retain();
             _owner->scheduleUpdate();
         }
-        Component *pComponent = dynamic_cast<Component*>(_components->objectForKey(pCom->getName()));
+        Component *component = nullptr;
+		auto iter = _components.find(std::string(com->getName()));
+		if(iter != _components.end()) {
+			component = iter->second;
+		}
         
-        CCASSERT(pComponent == NULL, "Component already added. It can't be added again");
-        CC_BREAK_IF(pComponent);
-        pCom->setOwner(_owner);
-        _components->setObject(pCom, pCom->getName());
-        pCom->onEnter();
-        bRet = true;
+        CCASSERT(component == nullptr, "Component already added. It can't be added again");
+        CC_BREAK_IF(component);
+        com->setOwner(_owner);
+		_components.insert(std::make_pair(std::string(com->getName()), com));
+		com->retain();
+        com->onEnter();
+        ret = true;
     } while(0);
-    return bRet;
+    return ret;
 }
 
-bool ComponentContainer::remove(const char *pName)
+bool ComponentContainer::remove(const std::string& name)
 {
-    bool bRet = false;
-    CCASSERT(pName != NULL, "Argument must be non-nil");
+    bool ret = false;
     do 
     {        
-        CC_BREAK_IF(!_components);
-        Object* pRetObject = NULL;
-        DictElement *pElement = NULL;
-        HASH_FIND_PTR(_components->_elements, pName, pElement);
-        if (pElement != NULL)
-        {
-           pRetObject = pElement->getObject();
-        }
-        Component *com = dynamic_cast<Component*>(pRetObject);
-        CC_BREAK_IF(!com);
+        CC_BREAK_IF(_components.empty());
+        
+        auto iter = _components.find(name);
+        CC_BREAK_IF(iter == _components.end());
+        
+        auto com = iter->second;
         com->onExit();
-        com->setOwner(NULL);
-        HASH_DEL(_components->_elements, pElement);
-        pElement->getObject()->release();
-        CC_SAFE_DELETE(pElement);
-        bRet = true;
+        com->setOwner(nullptr);
+		com->release();
+
+        _components.erase(iter);
+        
+        ret = true;
     } while(0);
-    return bRet;
+    return ret;
  }
 
 void ComponentContainer::removeAll()
 {
-    if (_components != NULL)
+    if (!_components.empty())
     {
-        DictElement *pElement, *tmp;
-        HASH_ITER(hh, _components->_elements, pElement, tmp)
+        for (auto iter = _components.begin(); iter != _components.end(); ++iter)
         {
-            HASH_DEL(_components->_elements, pElement);
-            ((Component*)pElement->getObject())->onExit();
-            ((Component*)pElement->getObject())->setOwner(NULL);
-            pElement->getObject()->release();
-            CC_SAFE_DELETE(pElement);
+            iter->second->onExit();
+            iter->second->setOwner(nullptr);
+			iter->second->release();
         }
+        
+        _components.clear();
+        
         _owner->unscheduleUpdate();
     }
 }
 
 void ComponentContainer::alloc(void)
 {
-    _components = Dictionary::create();
-    _components->retain();
+    // do nothing, the map isn't a pointer
 }
 
-void ComponentContainer::visit(float fDelta)
+void ComponentContainer::visit(float delta)
 {
-    if (_components != NULL)
+	if (!_components.empty())
     {
-        DictElement *pElement, *tmp;
-        HASH_ITER(hh, _components->_elements, pElement, tmp)
+        CC_SAFE_RETAIN(_owner);
+        for (auto iter = _components.begin(); iter != _components.end(); ++iter)
         {
-            ((Component*)pElement->getObject())->update(fDelta);
+			Component* component = iter->second; 
+            component->update(delta);
         }
+        CC_SAFE_RELEASE(_owner);
     }
 }
 
 bool ComponentContainer::isEmpty() const
 {
-    return (bool)(!(_components && _components->count()));
+    return (_components.empty());
 }
 
 NS_CC_END
