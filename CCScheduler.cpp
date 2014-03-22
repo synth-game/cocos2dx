@@ -555,7 +555,7 @@ void Scheduler::removeUpdateFromHash(struct _listEntry *entry)
 
         // target#release should be the last one to prevent
         // a possible double-free. eg: If the [target dealloc] might want to remove it itself from there
-        target->release();
+        //target->release();
     }
 }
 
